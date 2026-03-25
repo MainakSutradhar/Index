@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>MetaMask Web3 Bridge</title>
+</head>
+<body>
+
+  <h2>MetaMask Web3 Bridge</h2>
+
+  <button onclick="connectWallet()">Connect Wallet</button>
+  <button onclick="signMessage()">Sign Message</button>
+  <button onclick="sendTransaction()">Send Transaction</button>
+
+  <p id="status">Status: Not Connected</p>
+
+  <script>
+    let userAddress = "";
+
+    async function connectWallet() {
+      if (!window.ethereum) {
+        alert("Open inside MetaMask");
+        return;
+      }
+
+      try {
+        const accounts = await window.ethereum.request({
+          method: "eth_requestAccounts",
+        });
+
+        userAddress = accounts[0];
+
+        document.getElementById("status").innerText =
+          "Connected: " + userAddress;
+
+        // 🔥 Send back to app
+        window.location.href = `myapp://wallet?address=${userAddress}`;
+
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    async function signMessage() {
+      if (!userAddress) {
+        alert("Connect wallet first");
+        return;
+      }
+
+      try {
+        const message = "Hello from your dApp";
+
+        const signature = await window.ethereum.request({
+          method: "personal_sign",
+          params: [message, userAddress],
+        });
+
+        document.getElementById("status").innerText =
+          "Signed!";
+
+        // 🔥 Send back signature
+        window.location.href =
+          `myapp://sign?address=${userAddress}&signature=${signature}`;
+
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    async function sendTransaction() {
+      if (!userAddress) {
+        alert("Connect wallet first");
+        return;
+      }
+
+      try {
+        const txHash = await window.ethereum.request({
+          method: "eth_sendTransaction",
+          params: [{
+            from: userAddress,
+            to: "0xReceiverAddressHere",
+            value: "0x0", // 0 ETH (change if needed)
+          }],
+        });
+
+        document.getElementById("status").innerText =
+          "Transaction Sent!";
+
+        // 🔥 Send back tx hash
+        window.location.href =
+          `myapp://tx?address=${userAddress}&hash=${txHash}`;
+
+      } catch (err) {
+        console.error(err);
+      }
+    }
+  </script>
+
+</body>
+</html>
