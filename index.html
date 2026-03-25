@@ -1,13 +1,18 @@
 <!DOCTYPE html>
 <html>
+
 <head>
   <title>MetaMask Web3 Bridge</title>
 </head>
+
 <body>
 
   <h2>MetaMask Web3 Bridge</h2>
 
   <button onclick="handleConnect()">Connect Wallet</button>
+  <button id="returnBtn" style="display:none;" onclick="goBack()">
+    Return to App
+  </button>
 
   <p id="status">Status: Not Connected</p>
 
@@ -28,8 +33,7 @@
             "Connected: " + userAddress;
 
           // 🔥 Send back to app
-          window.location.href =
-            `myapp://wallet?address=${userAddress}`;
+          document.getElementById("returnBtn").style.display = "block";
 
         } catch (err) {
           console.error(err);
@@ -47,7 +51,12 @@
         window.location.href = metamaskUrl;
       }
     }
+    function goBack() {
+      window.location.href =
+        `myapp://wallet?address=${userAddress}`;
+    }
   </script>
 
 </body>
+
 </html>
