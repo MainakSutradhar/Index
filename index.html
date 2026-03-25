@@ -7,90 +7,44 @@
 
   <h2>MetaMask Web3 Bridge</h2>
 
-  <button onclick="connectWallet()">Connect Wallet</button>
-  <button onclick="signMessage()">Sign Message</button>
-  <button onclick="sendTransaction()">Send Transaction</button>
+  <button onclick="handleConnect()">Connect Wallet</button>
 
   <p id="status">Status: Not Connected</p>
 
   <script>
     let userAddress = "";
 
-    async function connectWallet() {
-      if (!window.ethereum) {
-        alert("Open inside MetaMask");
-        return;
-      }
+    async function handleConnect() {
+      // ✅ Case 1: Already inside MetaMask
+      if (window.ethereum) {
+        try {
+          const accounts = await window.ethereum.request({
+            method: "eth_requestAccounts",
+          });
 
-      try {
-        const accounts = await window.ethereum.request({
-          method: "eth_requestAccounts",
-        });
+          userAddress = accounts[0];
 
-        userAddress = accounts[0];
+          document.getElementById("status").innerText =
+            "Connected: " + userAddress;
 
-        document.getElementById("status").innerText =
-          "Connected: " + userAddress;
+          // 🔥 Send back to app
+          window.location.href =
+            `myapp://wallet?address=${userAddress}`;
 
-        // 🔥 Send back to app
-        window.location.href = `myapp://wallet?address=${userAddress}`;
+        } catch (err) {
+          console.error(err);
+        }
 
-      } catch (err) {
-        console.error(err);
-      }
-    }
+      } else {
+        // ❌ Not inside MetaMask → redirect
+        const url = window.location.href;
 
-    async function signMessage() {
-      if (!userAddress) {
-        alert("Connect wallet first");
-        return;
-      }
+        const metamaskUrl =
+          "https://metamask.app.link/dapp/" +
+          url.replace(/^https?:\/\//, "");
 
-      try {
-        const message = "Hello from your dApp";
-
-        const signature = await window.ethereum.request({
-          method: "personal_sign",
-          params: [message, userAddress],
-        });
-
-        document.getElementById("status").innerText =
-          "Signed!";
-
-        // 🔥 Send back signature
-        window.location.href =
-          `myapp://sign?address=${userAddress}&signature=${signature}`;
-
-      } catch (err) {
-        console.error(err);
-      }
-    }
-
-    async function sendTransaction() {
-      if (!userAddress) {
-        alert("Connect wallet first");
-        return;
-      }
-
-      try {
-        const txHash = await window.ethereum.request({
-          method: "eth_sendTransaction",
-          params: [{
-            from: userAddress,
-            to: "0xReceiverAddressHere",
-            value: "0x0", // 0 ETH (change if needed)
-          }],
-        });
-
-        document.getElementById("status").innerText =
-          "Transaction Sent!";
-
-        // 🔥 Send back tx hash
-        window.location.href =
-          `myapp://tx?address=${userAddress}&hash=${txHash}`;
-
-      } catch (err) {
-        console.error(err);
+        // 🔥 This MUST be inside click event
+        window.location.href = metamaskUrl;
       }
     }
   </script>
