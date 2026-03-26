@@ -51,9 +51,20 @@
         window.location.href = metamaskUrl;
       }
     }
-    function goBack() {
+    /*function goBack() {
       window.location.href =
         `myapp://wallet?address=${userAddress}`;
+    }*/
+    function goBack() {
+      const deepLink = `myapp://wallet?address=${userAddress}`;
+
+      // ✅ This works better in MetaMask
+      window.open(deepLink, "_self");
+
+      // 🔥 Fallback (important)
+      setTimeout(() => {
+        window.location.href = deepLink;
+      }, 500);
     }
   </script>
 
